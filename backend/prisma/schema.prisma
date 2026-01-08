@@ -1,0 +1,56 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+model User {
+  id           String         @id @default(uuid())
+  email        String         @unique
+  password     String
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  tasks        Task[]
+  refreshToken RefreshToken[]
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid())
+  tokenHash String
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+}
+
+model Task {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  completed   Boolean  @default(false)
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([completed])
+}
+/*
+if prisma is not working than please check the tsconfig.json file it should be
+exactly same and than ensure that datasouce and generate clinet are exactly same
+check for the env of the db also that will be in prisma.config.ts we will have the 
+DATABASE_URL = with pooler 
+DIRECT_URL = without pooler
+Direct url works !
+
+and if singelton is not working 
+check if you have installed the prisma and prisma client then run the npx prisma generate or
+click on the Generate button that is in the top of this file will apear if you open this
+code in the code editor
+
+*/
