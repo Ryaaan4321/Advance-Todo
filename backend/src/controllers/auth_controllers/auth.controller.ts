@@ -1,17 +1,23 @@
+import dotnev from 'dotenv'
 import bcrypt from 'bcrypt'
 import { Request } from 'express'
 import { Response } from 'express'
 import client from '../../prisma.js'
 import jwt from 'jsonwebtoken'
-import { signAccessToken, signRefreshToken } from '../../lib/validator.js';
+import { signAccessToken, signRefreshToken } from '../../lib/validator.js'
 import { REFRESH_SECRET } from '../../config/env.js'
+import prisma from '../../prisma.js'
+dotnev.config();
 export async function signup(req: Request, res: Response): Promise<Response> {
+    console.log("signup is called")
     try {
+        console.log("inside the try block");
         const { email, password } = req.body;
         const hashedPassword = await bcrypt.hash(password, 10);
         const user = await client.user.create({
             data: { email, password: hashedPassword }
         })
+        console.log("user == ", user);
         const refreshTokenRow = await prisma?.refreshToken.create({
             data: {
                 userId: user.id,
@@ -21,6 +27,7 @@ export async function signup(req: Request, res: Response): Promise<Response> {
         })
         const accessToken = signAccessToken(user.id);
         const refreshToken = signRefreshToken(refreshTokenRow?.id);
+        console.log("reefresh token from the register request == ", refreshToken)
         res.cookie("refreshToken", refreshToken, {
             httpOnly: true,
             secure: true,
@@ -51,10 +58,11 @@ export async function signin(req: Request, res: Response): Promise<Response> {
         });
         const accessToken = signAccessToken(user.id);
         const refreshToken = signRefreshToken(refreshTokenRow.id);
+        console.log("refresh token from the login request == ", refreshToken);
         res.cookie("refreshToken", refreshToken, {
             httpOnly: true,
-            secure: true,
-            sameSite: "strict"
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax"
         });
         return res.status(200).json({ msg: "user is logged in", accessToken })
     } catch (e) {
@@ -64,22 +72,25 @@ export async function signin(req: Request, res: Response): Promise<Response> {
 export async function refresh(req: Request, res: Response): Promise<Response> {
     const token = req.cookies.refreshToken;
     if (!token) return res.sendStatus(401);
-
     try {
-        const payload = jwt.verify(token, REFRESH_SECRET) as any;
-
+        console.log("inside the try blockk");
+        const refreshToken=REFRESH_SECRET();
+        const payload = jwt.verify(token, refreshToken) as any;
         const stored = await client.refreshToken.findUnique({
             where: { id: payload.jti }
         });
 
+        console.log("payload == ",payload);
+        console.log("stored == ",stored);
         if (!stored || stored.revokedAt || stored.expiresAt < new Date()) {
             return res.sendStatus(401);
         }
-        await client.refreshToken.update({
+        const updatedTokenresult =await client.refreshToken.update({
             where: { id: stored.id },
             data: { revoked: true }
 
         })
+        console.log("updated toekn ",updatedTokenresult);
         const newTokenRow = await client.refreshToken.create({
             data: {
                 userId: stored.userId,
@@ -87,12 +98,13 @@ export async function refresh(req: Request, res: Response): Promise<Response> {
                 expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
             }
         });
+        console.log("new token == ",newTokenRow);
         const newAccess = signAccessToken(stored.userId);
         const newRefresh = signRefreshToken(newTokenRow.id);
         res.cookie("refreshToken", newRefresh, {
             httpOnly: true,
-            secure: true,
-            sameSite: "strict"
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax"
         });
         return res.status(200).json({ accessToken: newAccess });
     } catch {
@@ -115,3 +127,13 @@ export async function logout(req: Request, res: Response): Promise<Response> {
     return res.sendStatus(204);
 
 }
+
+/*
+fetch("/auth/refresh", {
+  method: "POST",
+  credentials: "include",
+});
+
+axios.post("/auth/refresh", {}, { withCredentials: true });
+
+*/
