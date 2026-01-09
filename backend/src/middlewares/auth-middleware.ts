@@ -8,8 +8,8 @@ export function userAuth(
   next: NextFunction
 ) {
   const header = req.headers.authorization;
+  console.log("header from the middleware  == ",header);
   if (!header) return res.sendStatus(401);
-
   const token = header.split(" ")[1];
   if (!token) return res.sendStatus(401);
 

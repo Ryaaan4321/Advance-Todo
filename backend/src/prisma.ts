@@ -6,7 +6,7 @@ dotnev.config();
 
 console.log("direct url == ",process.env.DIRECT_URL);
 const pool = new Pool({
-  connectionString: process.env.DIRECT_URL,
+  connectionString: process.env.DATABASE_URL,
 });
 
 const adapter = new PrismaPg(pool);
