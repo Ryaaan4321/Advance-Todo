@@ -3,7 +3,7 @@ import prisma from "../../prisma.js";
 import { Prisma } from "@prisma/client";
 import { TaskStatus } from "@prisma/client";
 
-export async function createTodo(req: Request, res: Response): Promise<Response> {
+export async function createTasks(req: Request, res: Response): Promise<Response> {
     try {
         const userId = req.userId;
         if (!userId) {
@@ -33,7 +33,7 @@ export async function createTodo(req: Request, res: Response): Promise<Response>
     }
 }
 
-export async function getTodos(req: Request, res: Response): Promise<Response> {
+export async function getTasks(req: Request, res: Response): Promise<Response> {
     try {
         const userId = req.userId;
         if (!userId) {
@@ -85,3 +85,77 @@ export async function getTodos(req: Request, res: Response): Promise<Response> {
         return res.status(500).json({ msg: "something is wrong" })
     }
 }
+export async function getTaskByid(req: Request, res: Response): Promise<Response> {
+    try {
+        const userId = req.userId;
+        const { id } = req.params;
+        const task = await prisma.task.findFirst({ where: { id, userId } });
+        if (!task) {
+            return res.status(404).json({ msg: "task not found..!" })
+        }
+        return res.status(200).json({ msg: "successfull", task })
+    } catch (e) {
+        return res.status(500).json({ msg: "error on the code" })
+    }
+}
+export async function updateTask(req: Request, res: Response): Promise<Response> {
+    const userId = req.userId;
+    const { id } = req.params;
+    const { title, description, status } = req.body;
+    const task = await prisma.task.findFirst({
+        where: { id, userId },
+    });
+    if (!task) {
+        return res.status(404).json({ msg: 'task not found' });
+    }
+    const updated = await prisma.task.update({
+        where: { id },
+        data: {
+            title,
+            description,
+            status,
+        },
+    });
+    return res.json(updated);
+}
+export async function deleteTask(req: Request, res: Response): Promise<Response> {
+    const userId = req.userId;
+    const { id } = req.params;
+    const task = await prisma.task.findFirst({
+        where: { id, userId },
+    });
+    if (!task) {
+        return res.status(404).json({ msg: 'task not found' });
+    }
+    await prisma.task.delete({
+        where: { id },
+    });
+    return res.status(204).send();
+}
+export async function toggleTaskStatus(
+    req: Request,
+    res: Response
+): Promise<Response> {
+    const userId = req.userId;
+    const { id } = req.params;
+    const task = await prisma.task.findFirst({
+        where: { id, userId },
+    });
+    if (!task) {
+        return res.status(404).json({ msg: 'task not found' });
+    }
+    const updated = await prisma.task.update({
+        where: { id },
+        data: {
+            status:
+                task.status === 'PENDING'
+                    ? 'COMPLETED'
+                    : 'PENDING',
+        },
+    });
+    return res.json(updated);
+}
+
+
+
+
