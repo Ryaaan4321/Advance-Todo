@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { useAuth } from "@/context/AuthContext"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-
+import { toast } from "sonner"
 export default function RegisterForm() {
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
@@ -19,9 +19,11 @@ export default function RegisterForm() {
         setIsLoading(true)
         try {
             await signup(email, password)
+            toast.success("Account Created Succesfully")
             router.push('/')
         } catch (err: any) {
             setError(err.message || "Something went wrong")
+            toast.error(error)
         } finally {
             setEmail("");
             setPassword("");

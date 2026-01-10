@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { useAuth } from "@/context/AuthContext"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-
+import { toast } from "sonner"
 
 export default function LoginForm() {
     const [email, setEmail] = useState("")
@@ -20,9 +20,10 @@ export default function LoginForm() {
         setIsLoading(true)
         try {
             await login(email, password)
+            toast.success("Logged in")
             router.push('/')
         } catch (err: any) {
-            setError(err.message || "Something went wrong")
+            toast.error("please check your credentials")
         } finally {
             setEmail("");
             setPassword("");

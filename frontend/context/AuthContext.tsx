@@ -8,7 +8,7 @@ interface AuthContextType {
     login: (email: string, password: string) => Promise<void>
     signup: (email: string, password: string) => Promise<void>
     logout: () => Promise<void>
-
+    user: { email: string } | null
     authFetch: <T = any>(
         url: string,
         options?: RequestInit
@@ -17,13 +17,16 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | null>(null)
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [accessToken, setAccessToken] = useState<string | null>(null)
+    const [user, setUser] = useState<{ email: string } | null>(null)
+    const [isReady, setIsReady] = useState(false)
     useEffect(() => {
-        refreshAccessToken()
+        refreshAccessToken().finally(() => setIsReady(true))
     }, [])
     async function refreshAccessToken() {
         try {
             const data = await apiFetch("/auth/refresh", { method: "POST" })
             setAccessToken(data.accessToken)
+            setUser(data.user)
         } catch {
             setAccessToken(null)
         }
@@ -34,6 +37,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             body: JSON.stringify({ email, password }),
         })
         setAccessToken(data.accessToken)
+        setUser(data.user)
     }
     async function signup(email: string, password: string) {
         const data = await apiFetch("/auth/register", {
@@ -57,7 +61,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     return (
         <AuthContext.Provider
-            value={{ accessToken, login, signup, logout, authFetch }}
+            value={{ accessToken, login, signup, logout, user, authFetch }}
         >
             {children}
         </AuthContext.Provider>

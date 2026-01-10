@@ -31,7 +31,7 @@ export async function signup(req: Request, res: Response): Promise<Response> {
         res.cookie("refreshToken", refreshToken, {
             httpOnly: true,
             secure: true,
-            sameSite: "strict"
+            sameSite: "none"
         })
         return res.status(200).json({ msg: "succesfully user is created" })
     } catch (e) {
@@ -62,7 +62,7 @@ export async function signin(req: Request, res: Response): Promise<Response> {
         res.cookie("refreshToken", refreshToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
-            sameSite: "lax"
+            sameSite: "none"
         });
         return res.status(200).json({ msg: "user is logged in", accessToken })
     } catch (e) {

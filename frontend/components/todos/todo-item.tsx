@@ -83,14 +83,14 @@ export default function TodoItem({
             />
             <div className="flex-1 min-w-0">
               <h3
-                className={`font-medium text-foreground break-words ${todo.status == "COMPLETED" ? "line-through text-muted-foreground" : ""
+                className={`font-medium text-foreground  ${todo.status == "COMPLETED" ? "line-through text-muted-foreground" : ""
                   }`}
               >
                 {todo.title}
               </h3>
               {todo.description && (
                 <p
-                  className={`text-sm mt-1 break-words ${todo.status == "COMPLETED" ? "text-muted-foreground/50" : "text-muted-foreground"
+                  className={`text-sm mt-1 ${todo.status == "COMPLETED" ? "text-muted-foreground/50" : "text-muted-foreground"
                     }`}
                 >
                   {todo.description}

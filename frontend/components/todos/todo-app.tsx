@@ -7,14 +7,14 @@ import TodoHeader from "./todo-header"
 import type { Todo } from "@/types/todo"
 import { createTodoApi } from "@/lib/todo.api"
 import { useAuth } from "@/context/AuthContext"
+import { toast } from "sonner"
 interface TodoAppProps {
-    userEmail: string
     onLogout: () => void
 }
 export interface TodosResponse {
     tasks: Todo[]
 }
-export default function TodoApp({ userEmail, onLogout }: TodoAppProps) {
+export default function TodoApp({ onLogout }: TodoAppProps) {
     const [todos, setTodos] = useState<Todo[]>([])
     const [filter, setFilter] = useState<"all" | "active" | "completed">("all")
     const { accessToken, authFetch } = useAuth();
@@ -43,6 +43,9 @@ export default function TodoApp({ userEmail, onLogout }: TodoAppProps) {
     const addTodo = async (title: string, description: string) => {
         try {
             const createdTodo = await todoApi.create(title, description)
+            toast.success("Task Created", {
+                description: createdTodo.title
+            })
             setTodos((prev) => [createdTodo, ...prev])
         } catch (err) {
             console.error("Failed to create todo", err)
@@ -53,6 +56,7 @@ export default function TodoApp({ userEmail, onLogout }: TodoAppProps) {
     }
     const updateTodo = async (id: string, updates: Partial<Todo>) => {
         const updatedTodo = await todoApi.update(id, updates)
+        toast.success("Task Updated Succesfully")
         setTodos((prev) =>
             prev.map((todo) =>
                 todo.id === id ? updatedTodo : todo
@@ -60,12 +64,13 @@ export default function TodoApp({ userEmail, onLogout }: TodoAppProps) {
         )
     }
     const deleteTodo = async (id: string) => {
-        const prevTodos = todos
-        setTodos((prev) => prev.filter((t) => t.id !== id))
         try {
             await todoApi.delete(id)
-        } catch {
-            setTodos(prevTodos)
+            setTodos((prev) => prev.filter((t) => t.id !== id))
+            toast.success("Task deleted successfully")
+        } catch (err) {
+            console.error(err)
+            toast.error("Failed to delete task")
         }
     }
     const toggleComplete = async (id: string) => {
@@ -85,7 +90,7 @@ export default function TodoApp({ userEmail, onLogout }: TodoAppProps) {
     const activeCount = todos.length - completedCount
     return (
         <div className="min-h-screen bg-background flex flex-col">
-            <TodoHeader userEmail={userEmail} onLogout={onLogout} />
+            <TodoHeader onLogout={onLogout} />
 
             <div className="flex-1 flex items-center justify-center px-4 py-8 sm:py-12">
                 <div className="w-full max-w-2xl">
