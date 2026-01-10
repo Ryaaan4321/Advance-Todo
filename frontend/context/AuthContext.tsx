@@ -6,6 +6,7 @@ import { apiFetch } from "@/lib/api"
 interface AuthContextType {
     accessToken: string | null
     login: (email: string, password: string) => Promise<void>
+    signup:(email:string,password:string)=>Promise<void>
     logout: () => Promise<void>
 }
 const AuthContext = createContext<AuthContextType | null>(null)
@@ -33,12 +34,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         setAccessToken(data.accessToken)
     }
+    async function signup(email: string, password: string) {
+        const data = await apiFetch("/auth/register", {
+            method: "POST",
+            body: JSON.stringify({ email, password }),
+        })
+        setAccessToken(data.accessToken);
+    }
     async function logout() {
         await apiFetch("/auth/logout", { method: "POST" })
         setAccessToken(null)
     }
     return (
-        <AuthContext.Provider value={{ accessToken, login, logout }}>
+        <AuthContext.Provider value={{ accessToken, login, signup,logout }}>
             {children}
         </AuthContext.Provider>
     )
