@@ -7,12 +7,15 @@ import { todo } from "node:test"
 import { toast } from "sonner"
 export default function Home() {
   const router = useRouter();
-  const { accessToken, logout, user } = useAuth();
+  const { accessToken, logout, user, isReady } = useAuth();
   useEffect(() => {
-    if (!accessToken) {
+    if (isReady && !accessToken) {
       router.replace("/login")
     }
-  }, [accessToken])
+  }, [isReady, accessToken])
+  if (!isReady) {
+    return <div>Loading...</div>
+  }
   function handleLogout() {
     logout();
     toast.success("Logged Out!")

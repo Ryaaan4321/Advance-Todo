@@ -8,6 +8,7 @@ import { signAccessToken, signRefreshToken } from '../../lib/validator.js'
 import { REFRESH_SECRET } from '../../config/env.js'
 import prisma from '../../prisma.js'
 dotnev.config();
+const isProd = process.env.NODE_ENV === "production"
 export async function signup(req: Request, res: Response): Promise<Response> {
     console.log("signup is called")
     try {
@@ -30,8 +31,8 @@ export async function signup(req: Request, res: Response): Promise<Response> {
         console.log("reefresh token from the register request == ", refreshToken)
         res.cookie("refreshToken", refreshToken, {
             httpOnly: true,
-            secure: true,
-            sameSite: "none"
+            secure: isProd,
+            sameSite: isProd ? "none" : "lax",
         })
         return res.status(200).json({ msg: "succesfully user is created" })
     } catch (e) {
@@ -61,8 +62,8 @@ export async function signin(req: Request, res: Response): Promise<Response> {
         console.log("refresh token from the login request == ", refreshToken);
         res.cookie("refreshToken", refreshToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "none"
+            secure: isProd,
+            sameSite: isProd ? "none" : "lax",
         });
         return res.status(200).json({ msg: "user is logged in", accessToken })
     } catch (e) {
@@ -74,23 +75,23 @@ export async function refresh(req: Request, res: Response): Promise<Response> {
     if (!token) return res.sendStatus(401);
     try {
         console.log("inside the try blockk");
-        const refreshToken=REFRESH_SECRET();
+        const refreshToken = REFRESH_SECRET();
         const payload = jwt.verify(token, refreshToken) as any;
         const stored = await client.refreshToken.findUnique({
             where: { id: payload.jti }
         });
 
-        console.log("payload == ",payload);
-        console.log("stored == ",stored);
+        console.log("payload == ", payload);
+        console.log("stored == ", stored);
         if (!stored || stored.revokedAt || stored.expiresAt < new Date()) {
             return res.sendStatus(401);
         }
-        const updatedTokenresult =await client.refreshToken.update({
+        const updatedTokenresult = await client.refreshToken.update({
             where: { id: stored.id },
             data: { revoked: true }
 
         })
-        console.log("updated toekn ",updatedTokenresult);
+        console.log("updated toekn ", updatedTokenresult);
         const newTokenRow = await client.refreshToken.create({
             data: {
                 userId: stored.userId,
@@ -98,7 +99,7 @@ export async function refresh(req: Request, res: Response): Promise<Response> {
                 expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
             }
         });
-        console.log("new token == ",newTokenRow);
+        console.log("new token == ", newTokenRow);
         const newAccess = signAccessToken(stored.userId);
         const newRefresh = signRefreshToken(newTokenRow.id);
         res.cookie("refreshToken", newRefresh, {

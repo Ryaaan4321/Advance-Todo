@@ -9,6 +9,7 @@ interface AuthContextType {
     signup: (email: string, password: string) => Promise<void>
     logout: () => Promise<void>
     user: { email: string } | null
+    isReady:boolean
     authFetch: <T = any>(
         url: string,
         options?: RequestInit
@@ -61,7 +62,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     return (
         <AuthContext.Provider
-            value={{ accessToken, login, signup, logout, user, authFetch }}
+            value={{ accessToken, login, signup, logout, user,isReady, authFetch }}
         >
             {children}
         </AuthContext.Provider>
