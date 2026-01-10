@@ -72,7 +72,7 @@ export async function getTasks(req: Request, res: Response): Promise<Response> {
         console.log("Tasks == ", tasks);
         return res.status(200).json({
             msg: "fetched todos successfully",
-            data: tasks,
+            tasks,
             meta: {
                 page,
                 limit,

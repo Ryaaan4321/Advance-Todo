@@ -1,8 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import LoginPage from "@/components/auth/LoginPage"
 import { useAuth } from "@/context/AuthContext"
+import TodoApp from "@/components/todos/todo-app"
 
 export default function Home() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -32,10 +32,13 @@ export default function Home() {
     }
   }
 
+  function handlesubmit(){
 
+  }
+  const email="aryan@gmail.com"
   return (
     <div>
-      hello helooo
+     <TodoApp userEmail={email} onLogout={handlesubmit}/>
     </div>
   )
 }

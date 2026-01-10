@@ -1,16 +1,26 @@
-const API_URL=process.env.NEXT_PUBLIC_API_URL
-export async function apiFetch(url:string,options:RequestInit={}) {
-    const res=await fetch(`${API_URL}${url}`, {
+const API_URL = process.env.NEXT_PUBLIC_API_URL
+export async function apiFetch(
+    url: string,
+    options: RequestInit = {},
+    accessToken?: string
+) {
+    const res = await fetch(`${API_URL }${url}`, {
         ...options,
-        credentials:"include",
-        headers:{
-            "Content-Type":"application/json",
-            ...(options.headers || {})
-        }
+        headers: {
+            "Content-Type": "application/json",
+            ...(accessToken && {
+                Authorization: `Bearer ${accessToken}`,
+            }),
+            ...options.headers,
+        },
+        credentials: "include", 
     })
-    if(!res.ok){
-        const error=await res.json();
-        throw new Error(error.message || "Something went wrong")
+    if (res.status === 401) {
+        throw new Error("UNAUTHORIZED")
     }
-    return res.json();
+    if (!res.ok) {
+        const err = await res.json()
+        throw err
+    }
+    return res.json()
 }
