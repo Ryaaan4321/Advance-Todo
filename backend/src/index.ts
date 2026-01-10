@@ -8,19 +8,23 @@ import cors from "cors"
 const app = express();
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: [
+      "http://localhost:3000",
+      "https://advance-todo-chi.vercel.app",
+    ],
     credentials: true,
   })
 )
+
 app.use(express.json());
 app.use(cookieParser());
 
 app.use('/auth', authRouter);
-app.use('/tasks',todoRouter)
+app.use('/tasks', todoRouter)
 
 
 app.listen(5000, () => {
-    console.log("app is running")
+  console.log("app is running")
 })
 
 export default app;
