@@ -4,47 +4,26 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import type { Todo } from "@/types/todo"
-import { createTodoApi } from "@/lib/todo.api"
-import { useAuth } from "@/context/AuthContext"
-import { useEffect } from "react"
-import { useRouter } from "next/navigation"
 interface TodoItemProps {
   todo: Todo
+  expanded: boolean
+  onToggleDetails: (id: string) => void
   onToggle: (id: string) => void
   onDelete: (id: string) => void
   onUpdate: (id: string, updates: Partial<Todo>) => void
 }
 
-export default function TodoItem({ todo, onToggle, onDelete, onUpdate }: TodoItemProps) {
+export default function TodoItem({
+  todo,
+  expanded,
+  onToggleDetails,
+  onToggle,
+  onDelete,
+  onUpdate,
+}: TodoItemProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [editTitle, setEditTitle] = useState(todo.title)
   const [editDescription, setEditDescription] = useState(todo.description)
-  const { accessToken,authFetch } = useAuth();
-  const [todos, setTodos] = useState<Todo[]>([])
-  const [loading, setLoading] = useState(true)
-  const router = useRouter();
-  const todoApi=createTodoApi(authFetch);
-  useEffect(() => {
-    if (!accessToken) return
-
-    async function loadTodos() {
-      try {
-        const data = await todoApi.getAll()
-        setTodos(data.tasks)
-      } catch (err) {
-        console.error("Unauthorized or error", err)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    loadTodos()
-  }, [accessToken])
-
-  if (!accessToken) {
-    router.push('/login')
-  }
-
   const handleSaveEdit = () => {
     if (!editTitle.trim()) return
     onUpdate(todo.id, {
@@ -82,6 +61,15 @@ export default function TodoItem({ todo, onToggle, onDelete, onUpdate }: TodoIte
             <Button type="button" size="sm" onClick={handleSaveEdit}>
               Save
             </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => onToggleDetails(todo.id)}
+            >
+              {expanded ? "Hide details" : "Show details"}
+            </Button>
+
           </div>
         </div>
       ) : (
@@ -107,6 +95,16 @@ export default function TodoItem({ todo, onToggle, onDelete, onUpdate }: TodoIte
                 >
                   {todo.description}
                 </p>
+              )}
+              {expanded && (
+                <div className="mt-3 text-sm text-muted-foreground">
+                  <p><strong>Description:</strong> {todo.description}</p>
+                  <p><strong>Status:</strong> {todo.status}</p>
+                  <p>
+                    <strong>Created:</strong>{" "}
+                    {new Date(todo.createdAt).toLocaleString()}
+                  </p>
+                </div>
               )}
             </div>
           </div>

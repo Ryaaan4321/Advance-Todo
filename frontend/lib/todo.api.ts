@@ -10,7 +10,7 @@ export const createTodoApi = (
     getAll: () => authFetch<TodosResponse>("/tasks"),
 
     create: (title: string, description: string) =>
-        authFetch<Todo>("/todos", {
+        authFetch<Todo>("/tasks", {
             method: "POST",
             body: JSON.stringify({ title, description }),
         }),

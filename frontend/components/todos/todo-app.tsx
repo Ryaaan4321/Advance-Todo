@@ -18,12 +18,12 @@ export default function TodoApp({ userEmail, onLogout }: TodoAppProps) {
     const [todos, setTodos] = useState<Todo[]>([])
     const [filter, setFilter] = useState<"all" | "active" | "completed">("all")
     const { accessToken, authFetch } = useAuth();
+    const [expandedId, setExpandedId] = useState<string | null>(null)
     console.log("access Token == ", accessToken);
     const [loading, setLoading] = useState(true)
     const todoApi = createTodoApi(authFetch)
     useEffect(() => {
         if (!accessToken) return
-
         async function loadTodos() {
             try {
                 const data = await todoApi.getAll()
@@ -37,21 +37,20 @@ export default function TodoApp({ userEmail, onLogout }: TodoAppProps) {
 
         loadTodos()
     }, [accessToken])
-    const addTodo = (title: string, description: string) => {
-        const newTodo: Todo = {
-            id: Date.now().toString(),
-            title,
-            description,
-            status: "PENDING",
-            createdAt: new Date().toISOString(),
-        }
-        setTodos([newTodo, ...todos])
+    const handleToggleDetails = (id: string) => {
+        setExpandedId((prev) => (prev === id ? null : id))
     }
-
+    const addTodo = async (title: string, description: string) => {
+        try {
+            const createdTodo = await todoApi.create(title, description)
+            setTodos((prev) => [createdTodo, ...prev])
+        } catch (err) {
+            console.error("Failed to create todo", err)
+        }
+    }
     const getTodo = (id: string) => {
         return todos.find((todo) => todo.id === id)
     }
-
     const updateTodo = async (id: string, updates: Partial<Todo>) => {
         const updatedTodo = await todoApi.update(id, updates)
         setTodos((prev) =>
@@ -62,21 +61,17 @@ export default function TodoApp({ userEmail, onLogout }: TodoAppProps) {
     }
     const deleteTodo = async (id: string) => {
         const prevTodos = todos
-
         setTodos((prev) => prev.filter((t) => t.id !== id))
-
         try {
             await todoApi.delete(id)
         } catch {
-            setTodos(prevTodos) 
+            setTodos(prevTodos)
         }
     }
     const toggleComplete = async (id: string) => {
         const todo = todos.find((t) => t.id === id)
         if (!todo) return
-
         const updated = await todoApi.toggle(id)
-
         setTodos((prev) =>
             prev.map((t) => (t.id === id ? updated : t))
         )
@@ -86,10 +81,8 @@ export default function TodoApp({ userEmail, onLogout }: TodoAppProps) {
         if (filter === "completed") return todo.status == "COMPLETED"
         return true
     })
-
     const completedCount = todos.filter((t) => t.status === "COMPLETED").length
     const activeCount = todos.length - completedCount
-
     return (
         <div className="min-h-screen bg-background flex flex-col">
             <TodoHeader userEmail={userEmail} onLogout={onLogout} />
@@ -124,7 +117,13 @@ export default function TodoApp({ userEmail, onLogout }: TodoAppProps) {
                                 ))}
                             </div>
 
-                            <TodoList todos={filteredTodos} onToggle={toggleComplete} onDelete={deleteTodo} onUpdate={updateTodo} />
+                            <TodoList
+                                expandedId={expandedId}
+                                onToggleDetails={handleToggleDetails}
+                                todos={filteredTodos}
+                                onToggle={toggleComplete}
+                                onDelete={deleteTodo}
+                                onUpdate={updateTodo} />
                         </div>
                     )}
                 </div>
