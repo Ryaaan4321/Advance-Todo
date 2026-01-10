@@ -89,51 +89,63 @@ export default function TodoApp({ onLogout }: TodoAppProps) {
     })
     const completedCount = todos.filter((t) => t.status === "COMPLETED").length
     const activeCount = todos.length - completedCount
+    const filterStyles = {
+        all: "bg-secondary text-secondary-foreground",
+        active: "bg-blue-600 text-white",
+        completed: "bg-green-600 text-white",
+    }
     return (
         <div className="min-h-screen bg-background flex flex-col">
             <TodoHeader onLogout={onLogout} />
             <PatternBackground>
-            <div className="flex-1 flex items-center justify-center px-4 py-8 sm:py-12">
-                <div className="w-full max-w-2xl">
-                    <div className="mb-8">
-                        <h2 className="text-3xl font-bold text-foreground mb-2">Your Tasks</h2>
-                        <p className="text-muted-foreground">
-                            {activeCount === 0 && completedCount === 0
-                                ? "Create your first task to get started"
-                                : `${activeCount} active · ${completedCount} completed`}
-                        </p>
-                    </div>
-
-                    <TodoForm onAddTodo={addTodo} />
-
-                    {todos.length > 0 && (
-                        <div className="mt-8">
-                            <div className="flex gap-2 mb-6 flex-wrap">
-                                {(["all", "active", "completed"] as const).map((f) => (
-                                    <button
-                                        key={f}
-                                        onClick={() => setFilter(f)}
-                                        className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${filter === f
-                                            ? "bg-primary text-primary-foreground"
-                                            : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
-                                            }`}
-                                    >
-                                        {f.charAt(0).toUpperCase() + f.slice(1)}
-                                    </button>
-                                ))}
-                            </div>
-
-                            <TodoList
-                                expandedId={expandedId}
-                                onToggleDetails={handleToggleDetails}
-                                todos={filteredTodos}
-                                onToggle={toggleComplete}
-                                onDelete={deleteTodo}
-                                onUpdate={updateTodo} />
+                <div className="flex-1 flex items-center justify-center px-4 py-8 sm:py-12">
+                    <div className="w-full max-w-2xl">
+                        <div className="mb-8">
+                            <h2 className="text-3xl font-bold text-foreground mb-2">Your Tasks</h2>
+                            <p className="text-muted-foreground">
+                                {activeCount === 0 && completedCount === 0
+                                    ? "Create your first task to get started"
+                                    : `${activeCount} active · ${completedCount} completed`}
+                            </p>
                         </div>
-                    )}
+
+                        <TodoForm onAddTodo={addTodo} />
+
+                        {todos.length > 0 && (
+                            <div className="mt-8">
+                                <div className="flex gap-2 mb-6 flex-wrap">
+                                    {(["all", "active", "completed"] as const).map((f) => {
+                                        const isActive = filter === f
+
+                                        return (
+                                            <button
+                                                key={f}
+                                                onClick={() => setFilter(f)}
+                                                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200
+        ${isActive
+                                                        ? `${filterStyles[f]}  scale-105`
+                                                        : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                                                    }
+      `}
+                                            >
+                                                {f.charAt(0).toUpperCase() + f.slice(1)}
+                                            </button>
+                                        )
+                                    })}
+
+                                </div>
+
+                                <TodoList
+                                    expandedId={expandedId}
+                                    onToggleDetails={handleToggleDetails}
+                                    todos={filteredTodos}
+                                    onToggle={toggleComplete}
+                                    onDelete={deleteTodo}
+                                    onUpdate={updateTodo} />
+                            </div>
+                        )}
+                    </div>
                 </div>
-            </div>
             </PatternBackground>
         </div>
     )
