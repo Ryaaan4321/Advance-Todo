@@ -14,6 +14,25 @@ export async function signup(req: Request, res: Response): Promise<Response> {
     try {
         console.log("inside the try block");
         const { email, password } = req.body;
+        if (
+            typeof email !== "string" ||
+            typeof password !== "string" ||
+            email.trim() === "" ||
+            password.trim() === ""
+        ) {
+            return res.status(400).json({
+                message: "Invalid email or password",
+            });
+        }
+        const existingUser = await client.user.findUnique({
+            where: { email },
+        });
+
+        if (existingUser) {
+            return res.status(409).json({
+                message: "Email already registered",
+            });
+        }
         const hashedPassword = await bcrypt.hash(password, 10);
         const user = await client.user.create({
             data: { email, password: hashedPassword }

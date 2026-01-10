@@ -8,6 +8,7 @@ import type { Todo } from "@/types/todo"
 import { createTodoApi } from "@/lib/todo.api"
 import { useAuth } from "@/context/AuthContext"
 import { toast } from "sonner"
+import PatternBackground from "../layouts/PatternBackground"
 interface TodoAppProps {
     onLogout: () => void
 }
@@ -91,7 +92,7 @@ export default function TodoApp({ onLogout }: TodoAppProps) {
     return (
         <div className="min-h-screen bg-background flex flex-col">
             <TodoHeader onLogout={onLogout} />
-
+            <PatternBackground>
             <div className="flex-1 flex items-center justify-center px-4 py-8 sm:py-12">
                 <div className="w-full max-w-2xl">
                     <div className="mb-8">
@@ -133,6 +134,7 @@ export default function TodoApp({ onLogout }: TodoAppProps) {
                     )}
                 </div>
             </div>
+            </PatternBackground>
         </div>
     )
 }

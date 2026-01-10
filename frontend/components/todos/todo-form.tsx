@@ -51,6 +51,7 @@ export default function TodoForm({ onAddTodo }: TodoFormProps) {
                         <div className="flex gap-2 justify-end">
                             <Button
                                 type="button"
+                                className="cursor-pointer"
                                 variant="outline"
                                 onClick={() => {
                                     setIsExpanded(false)
@@ -60,7 +61,7 @@ export default function TodoForm({ onAddTodo }: TodoFormProps) {
                             >
                                 Cancel
                             </Button>
-                            <Button type="submit">Add Task</Button>
+                            <Button type="submit" className="cursor-pointer">Add Task</Button>
                         </div>
                     </div>
                 )}

@@ -23,7 +23,7 @@ export default function RegisterForm() {
             router.push('/')
         } catch (err: any) {
             setError(err.message || "Something went wrong")
-            toast.error(error)
+            toast.error(err.message)
         } finally {
             setEmail("");
             setPassword("");
@@ -74,11 +74,6 @@ export default function RegisterForm() {
                         disabled={isLoading}
                     />
                 </div>
-                {error && (
-                    <div className="bg-destructive/10 text-destructive text-sm px-3 py-2 rounded-md border border-destructive/20">
-                        {error}
-                    </div>
-                )}
                 <Button
                     onClick={handleSignup}
                     disabled={isLoading}
