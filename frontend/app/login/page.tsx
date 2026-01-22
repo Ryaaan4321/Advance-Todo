@@ -46,18 +46,12 @@ export default function LoginForm() {
         <div className="fixed inset-0 flex items-center justify-center px-4 sm:px-6">
             <div className="w-full max-w-sm sm:max-w-md space-y-5 sm:space-y-6">
                 <div className="space-y-1 sm:space-y-2 text-center sm:text-left">
-                    <h1 className="text-2xl sm:text-4xl font-semibold">
-                        Welcome{" "}
-                        <span
-                            key={words[wordIndex]}
-                            className="inline-block animate-pulse text-primary"
-                        >
-                            {words[wordIndex]}
-                        </span>
-                    </h1>
-                    <p className="text-sm sm:text-base text-muted-foreground">
-                        Start where you left off
-                    </p>
+                    <div className="space-y-1 sm:space-y-2 text-center sm:text-left">
+                        Welcome Home!
+                        <p className="text-sm sm:text-base text-muted-foreground">
+                            Start where you left off
+                        </p>
+                    </div>
                 </div>
                 <div className="space-y-1">
                     <label
