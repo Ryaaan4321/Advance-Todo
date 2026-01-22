@@ -9,8 +9,8 @@ interface TodoItemProps {
   expanded: boolean
   onToggleDetails: (id: string) => void
   onToggle: (id: string) => void
-  onDelete: (id: string) => void
-  onUpdate: (id: string, updates: Partial<Todo>) => void
+  onDelete: (id: string) => Promise<void>
+  onUpdate: (id: string, updates: Partial<Todo>) => Promise<void>
 }
 
 export default function TodoItem({
@@ -24,22 +24,35 @@ export default function TodoItem({
   const [isEditing, setIsEditing] = useState(false)
   const [editTitle, setEditTitle] = useState(todo.title)
   const [editDescription, setEditDescription] = useState(todo.description)
-  const handleSaveEdit = () => {
+  const [isSaving, setIsSaving] = useState(false)
+  const [isDeleting,setIsDeleting]=useState(false);
+  const handleSaveEdit = async () => {
+    setIsSaving(true);
     if (!editTitle.trim()) return
-    onUpdate(todo.id, {
+    await onUpdate(todo.id, {
       title: editTitle,
       description: editDescription,
     })
 
     setIsEditing(false)
+    setIsSaving(false);
   }
   const handleCancel = () => {
     setEditTitle(todo.title)
     setEditDescription(todo.description)
     setIsEditing(false)
   }
+  const handleDelete = async () => {
+    try {
+      setIsDeleting(true)
+      await onDelete(todo.id)
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
   return (
-    <div className={`border border-border rounded-lg p-4 bg-card transition-all ${todo.status == "COMPLETED" ? "opacity-60" : ""}`}>
+    <div className={`border border-border rounded-lg p-4 bg-card transition-all ${todo.status == "COMPLETED" ? "" : ""}`}>
       {isEditing ? (
         <div className="space-y-3">
           <Input
@@ -55,19 +68,29 @@ export default function TodoItem({
             rows={2}
           />
           <div className="flex gap-2 justify-end">
-            <Button type="button" variant="outline" size="sm" onClick={handleCancel}>
+            <Button type="button" variant="outline" size="sm" onClick={handleCancel}
+              className="cursor-pointer"
+            >
               Cancel
             </Button>
-            <Button type="button" size="sm" onClick={handleSaveEdit}>
-              Save
+            <Button type="button" size="sm" onClick={handleSaveEdit} className={`cursor-pointer bg-blue-900 isSaving ? "hover:bg-inherit transition-none" : ""`}>
+              {isSaving ? (
+                <span className="flex items-center gap-2">
+                  <span className="h-4 w-4 animate-spin  rounded-full border-2 border-current border-t-transparent" />
+                  Saving
+                </span>
+              ) : (
+                "Save"
+              )}
             </Button>
             <Button
+
               type="button"
               variant="ghost"
               size="sm"
               onClick={() => onToggleDetails(todo.id)}
             >
-              {expanded ? "Hide details" : "Show details"}
+              {/* {expanded ? "Hide details" : "Show details"} */}
             </Button>
 
           </div>
@@ -110,17 +133,18 @@ export default function TodoItem({
           </div>
 
           <div className="flex gap-2 justify-end mt-3">
-            <Button type="button" variant="ghost" size="sm" onClick={() => setIsEditing(true)}>
-              Edit
-            </Button>
+            {todo.status === "COMPLETED" ? "" :
+              <Button className="cursor-pointer" variant="ghost" size="sm" onClick={() => setIsEditing(true)}>
+                Edit
+              </Button>}
             <Button
               type="button"
               variant="ghost"
               size="sm"
-              onClick={() => onDelete(todo.id)}
-              className="text-destructive hover:text-destructive hover:bg-destructive/10"
+              onClick={handleDelete}
+              className="text-destructive cursor-pointer hover:text-destructive hover:bg-destructive/10"
             >
-              Delete
+              {isDeleting ? "Deleting…" : "Delete"}
             </Button>
           </div>
         </div>

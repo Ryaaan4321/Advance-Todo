@@ -25,12 +25,20 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=League+Spartan:wght@100..900&family=Manrope:wght@200;300;400;500;600;700;800&family=Oswald:wght@200..700&family=Poppins:ital,wght@0,100..900;1,100..900&family=Urbanist:ital,wght@0,100..700;1,100..700&display=swap"
+          rel="stylesheet"
+        />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AuthProvider>
           {children}
-           <Toaster richColors position="top-right" />
+          <Toaster richColors position="top-right" />
         </AuthProvider>
       </body>
     </html>

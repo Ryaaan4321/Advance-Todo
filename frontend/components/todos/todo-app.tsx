@@ -9,6 +9,8 @@ import { createTodoApi } from "@/lib/todo.api"
 import { useAuth } from "@/context/AuthContext"
 import { toast } from "sonner"
 import PatternBackground from "../layouts/PatternBackground"
+import { RevolvingDot } from "react-loader-spinner"
+import ElegantLoader from "../Loader"
 interface TodoAppProps {
     onLogout: () => void
 }
@@ -20,6 +22,7 @@ export default function TodoApp({ onLogout }: TodoAppProps) {
     const [filter, setFilter] = useState<"all" | "active" | "completed">("all")
     const { accessToken, authFetch } = useAuth();
     const [expandedId, setExpandedId] = useState<string | null>(null)
+    const [createLoading, setCreateLoading] = useState(false);
     console.log("access Token == ", accessToken);
     const [loading, setLoading] = useState(true)
     const todoApi = createTodoApi(authFetch)
@@ -43,11 +46,13 @@ export default function TodoApp({ onLogout }: TodoAppProps) {
     }
     const addTodo = async (title: string, description: string) => {
         try {
+            setCreateLoading(true);
             const createdTodo = await todoApi.create(title, description)
             toast.success("Task Created", {
                 description: createdTodo.title
             })
             setTodos((prev) => [createdTodo, ...prev])
+            setCreateLoading(false);
         } catch (err) {
             console.error("Failed to create todo", err)
         }
@@ -98,54 +103,56 @@ export default function TodoApp({ onLogout }: TodoAppProps) {
         <div className="min-h-screen bg-background flex flex-col">
             <TodoHeader onLogout={onLogout} />
             <PatternBackground>
-                <div className="flex-1 flex items-center justify-center px-4 py-8 sm:py-12">
-                    <div className="w-full max-w-2xl">
-                        <div className="mb-8">
-                            <h2 className="text-3xl font-bold text-foreground mb-2">Your Tasks</h2>
-                            <p className="text-muted-foreground">
-                                {activeCount === 0 && completedCount === 0
-                                    ? "Create your first task to get started"
-                                    : `${activeCount} active · ${completedCount} completed`}
-                            </p>
-                        </div>
-
-                        <TodoForm onAddTodo={addTodo} />
-
-                        {todos.length > 0 && (
-                            <div className="mt-8">
-                                <div className="flex gap-2 mb-6 flex-wrap">
-                                    {(["all", "active", "completed"] as const).map((f) => {
-                                        const isActive = filter === f
-
-                                        return (
-                                            <button
-                                                key={f}
-                                                onClick={() => setFilter(f)}
-                                                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200
-        ${isActive
-                                                        ? `${filterStyles[f]}  scale-105`
-                                                        : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
-                                                    }
-      `}
-                                            >
-                                                {f.charAt(0).toUpperCase() + f.slice(1)}
-                                            </button>
-                                        )
-                                    })}
-
-                                </div>
-
-                                <TodoList
-                                    expandedId={expandedId}
-                                    onToggleDetails={handleToggleDetails}
-                                    todos={filteredTodos}
-                                    onToggle={toggleComplete}
-                                    onDelete={deleteTodo}
-                                    onUpdate={updateTodo} />
+                {createLoading == true ?
+                    <ElegantLoader></ElegantLoader>
+                    : <div className="flex-1 flex items-center justify-center px-4 py-8 sm:py-12">
+                        <div className="w-full max-w-2xl">
+                            <div className="mb-8">
+                                <h2 className="text-3xl font-bold text-foreground mb-2">Your Tasks</h2>
+                                <p className="text-muted-foreground">
+                                    {activeCount === 0 && completedCount === 0
+                                        ? "Create your first task to get started"
+                                        : `${activeCount} active · ${completedCount} completed`}
+                                </p>
                             </div>
-                        )}
-                    </div>
-                </div>
+
+                            <TodoForm onAddTodo={addTodo} />
+
+                            {todos.length > 0 && (
+                                <div className="mt-8">
+                                    <div className="flex gap-2 mb-6 flex-wrap">
+                                        {(["all", "active", "completed"] as const).map((f) => {
+                                            const isActive = filter === f
+
+                                            return (
+                                                <button
+                                                    key={f}
+                                                    onClick={() => setFilter(f)}
+                                                    className={`px-4 py-2 rounded-full text-sm font-medium cursor-pointer transition-all duration-200
+        ${isActive
+                                                            ? `${filterStyles[f]}  scale-105`
+                                                            : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                                                        }
+      `}
+                                                >
+                                                    {f.charAt(0).toUpperCase() + f.slice(1)}
+                                                </button>
+                                            )
+                                        })}
+
+                                    </div>
+
+                                    <TodoList
+                                        expandedId={expandedId}
+                                        onToggleDetails={handleToggleDetails}
+                                        todos={filteredTodos}
+                                        onToggle={toggleComplete}
+                                        onDelete={deleteTodo}
+                                        onUpdate={updateTodo} />
+                                </div>
+                            )}
+                        </div>
+                    </div>}
             </PatternBackground>
         </div>
     )

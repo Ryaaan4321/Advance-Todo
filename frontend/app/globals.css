@@ -4,6 +4,11 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-mono-stack);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
@@ -47,6 +52,12 @@
 }
 
 :root {
+  --font-inter: "Inter", sans-serif;
+  --font-poppins: "Poppins", sans-serif;
+  --font-league: "League Spartan", sans-serif;
+  --font-urbanist: "Urbanist", sans-serif;
+
+  --font-mono-stack: ui-monospace, SFMono-Regular, Menlo, monospace;
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.147 0.004 49.25);
@@ -117,8 +128,9 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply font-sans outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
