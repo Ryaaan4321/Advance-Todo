@@ -6,14 +6,18 @@ import client from '../../prisma.js'
 import jwt from 'jsonwebtoken'
 import { signAccessToken, signRefreshToken } from '../../lib/validator.js'
 import { REFRESH_SECRET } from '../../config/env.js'
-import prisma from '../../prisma.js'
 dotnev.config();
 const isProd = process.env.NODE_ENV === "production"
+console.log("is prod== ", isProd);
 export async function signup(req: Request, res: Response): Promise<Response> {
-    console.log("signup is called")
+    console.log("headers:", req.headers["content-type"]);
+    console.log("raw body:", req.body);
+    console.log("req body ", req.body);
     try {
         console.log("inside the try block");
         const { email, password } = req.body;
+        console.log("email from the signup ", email);
+        console.log("password from the signup ", password);
         if (
             typeof email !== "string" ||
             typeof password !== "string" ||
@@ -27,7 +31,7 @@ export async function signup(req: Request, res: Response): Promise<Response> {
         const existingUser = await client.user.findUnique({
             where: { email },
         });
-
+        console.log("exiting user == ", existingUser);
         if (existingUser) {
             return res.status(409).json({
                 message: "Email already registered",
@@ -38,13 +42,14 @@ export async function signup(req: Request, res: Response): Promise<Response> {
             data: { email, password: hashedPassword }
         })
         console.log("user == ", user);
-        const refreshTokenRow = await prisma?.refreshToken.create({
+        const refreshTokenRow = await client?.refreshToken.create({
             data: {
                 userId: user.id,
                 tokenHash: crypto.randomUUID(),
                 expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
             }
         })
+        console.log("refresh TOken == ", refreshTokenRow);
         const accessToken = signAccessToken(user.id);
         const refreshToken = signRefreshToken(refreshTokenRow?.id);
         console.log("reefresh token from the register request == ", refreshToken)
@@ -53,8 +58,9 @@ export async function signup(req: Request, res: Response): Promise<Response> {
             secure: isProd,
             sameSite: isProd ? "none" : "lax",
         })
-        return res.status(200).json({ msg: "succesfully user is created" })
+        return res.status(200).json({ msg: "succesfully user is created", accessToken })
     } catch (e) {
+        console.error(e);
         return res.status(500).json({ msg: "there is an error on this code" })
     }
 }
@@ -86,6 +92,7 @@ export async function signin(req: Request, res: Response): Promise<Response> {
         });
         return res.status(200).json({ msg: "user is logged in", accessToken })
     } catch (e) {
+        console.error(e);
         return res.status(500).json({ msg: "there is an error on this code" });
     }
 }
@@ -135,7 +142,8 @@ export async function logout(req: Request, res: Response): Promise<Response> {
     const token = req.cookies.refreshToken;
     if (!token) return res.sendStatus(204);
     try {
-        const payload = jwt.verify(token, REFRESH_SECRET) as any;
+        const refreshToken = REFRESH_SECRET();
+        const payload = jwt.verify(token, refreshToken) as any;
         await client.refreshToken.update({
             where: { id: payload.jti },
             data: { revoked: true }

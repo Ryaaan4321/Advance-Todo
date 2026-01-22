@@ -24,7 +24,7 @@ export async function createTasks(req, res) {
                 userId
             }
         });
-        return res.status(201).json({ msg: "todo is created", newTodo });
+        return res.status(201).json(newTodo);
     }
     catch (e) {
         return res.status(500).json({ msg: "something wrong happened while creating the todo" });
@@ -68,7 +68,7 @@ export async function getTasks(req, res) {
         console.log("Tasks == ", tasks);
         return res.status(200).json({
             msg: "fetched todos successfully",
-            data: tasks,
+            tasks,
             meta: {
                 page,
                 limit,

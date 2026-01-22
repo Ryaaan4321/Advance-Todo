@@ -27,7 +27,7 @@ export async function createTasks(req: Request, res: Response): Promise<Response
                 userId
             }
         })
-        return res.status(201).json({ msg: "todo is created", newTodo })
+        return res.status(201).json(newTodo);
     } catch (e) {
         return res.status(500).json({ msg: "something wrong happened while creating the todo" })
     }

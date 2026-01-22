@@ -24,6 +24,7 @@ export default function TodoForm({ onAddTodo }: TodoFormProps) {
             setDescription("")
             setIsExpanded(false)
         }
+        
     }
 
     return (
