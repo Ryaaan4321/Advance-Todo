@@ -9,8 +9,8 @@ interface TodoItemProps {
   expanded: boolean
   onToggleDetails: (id: string) => void
   onToggle: (id: string) => void
-  onDelete: (id: string) => Promise<void>
-  onUpdate: (id: string, updates: Partial<Todo>) => Promise<void>
+  onDelete: (id: string) => void
+  onUpdate: (id: string, updates: Partial<Todo>) =>void
 }
 
 export default function TodoItem({

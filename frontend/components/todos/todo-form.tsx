@@ -24,7 +24,7 @@ export default function TodoForm({ onAddTodo }: TodoFormProps) {
             setDescription("")
             setIsExpanded(false)
         }
-        
+
     }
 
     return (
@@ -62,7 +62,7 @@ export default function TodoForm({ onAddTodo }: TodoFormProps) {
                             >
                                 Cancel
                             </Button>
-                            <Button type="submit" className="cursor-pointer">Add Task</Button>
+                            <Button type="submit" className="cursor-pointer bg-green-700 hover:bg-green-700">Add Task</Button>
                         </div>
                     </div>
                 )}
