@@ -7,6 +7,7 @@ import { useAuth } from "@/context/AuthContext"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
+import { useEffect } from "react"
 
 export default function LoginForm() {
     const [email, setEmail] = useState("")
@@ -14,7 +15,17 @@ export default function LoginForm() {
     const [error, setError] = useState("")
     const [isLoading, setIsLoading] = useState(false)
     const { login } = useAuth()
-    const router=useRouter();
+    const router = useRouter();
+    const words = ["Back", "Home", "Again", "Reality"];
+    const [wordIndex, setWordIndex] = useState(0);
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setWordIndex((prev) => (prev + 1) % words.length);
+        }, 2500);
+        return () => clearInterval(interval);
+    }, []);
+
     async function handleLogin() {
         setError("")
         setIsLoading(true)
@@ -36,7 +47,13 @@ export default function LoginForm() {
             <div className="w-full max-w-sm sm:max-w-md space-y-5 sm:space-y-6">
                 <div className="space-y-1 sm:space-y-2 text-center sm:text-left">
                     <h1 className="text-2xl sm:text-4xl font-semibold">
-                        Welcome Back
+                        Welcome{" "}
+                        <span
+                            key={words[wordIndex]}
+                            className="inline-block animate-pulse text-primary"
+                        >
+                            {words[wordIndex]}
+                        </span>
                     </h1>
                     <p className="text-sm sm:text-base text-muted-foreground">
                         Start where you left off
@@ -82,9 +99,13 @@ export default function LoginForm() {
                 <Button
                     onClick={handleLogin}
                     disabled={isLoading}
-                    className="w-full h-10 sm:h-11"
+                    className="w-full h-10 sm:h-11 cursor-pointer"
                 >
-                    {isLoading ? "Signing in..." : "Sign In"}
+                    {isLoading ?
+                        <span className="flex items-center gap-2">
+                            <span className="h-4 w-4 animate-spin  rounded-full border-2 border-current border-t-transparent" />
+                            Logging In
+                        </span> : "Login"}
                 </Button>
                 <p>Already have an Account <Link href='/signup'
                     className="text-blue-900 font-semibold">

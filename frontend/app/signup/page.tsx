@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useAuth } from "@/context/AuthContext"
@@ -13,7 +14,15 @@ export default function RegisterForm() {
     const [error, setError] = useState("")
     const [isLoading, setIsLoading] = useState(false)
     const { signup } = useAuth()
-    const router=useRouter();
+    const router = useRouter();
+    const words = ["Account", "Your Home", "Your Flow", "Your Start"];
+    const [wordIndex, setWordIndex] = useState(0);
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setWordIndex((prev) => (prev + 1) % words.length);
+        }, 2500);
+        return () => clearInterval(interval);
+    }, []);
     async function handleSignup() {
         setError("")
         setIsLoading(true)
@@ -36,7 +45,7 @@ export default function RegisterForm() {
             <div className="w-full max-w-sm sm:max-w-md space-y-5 sm:space-y-6">
                 <div className="space-y-1 sm:space-y-2 text-center sm:text-left">
                     <h1 className="text-2xl sm:text-4xl font-semibold font-[Inter]">
-                        Welcome 
+                        Create Your Flow!
                     </h1>
                     <p className="text-sm sm:text-base text-muted-foreground">
                         Let's Start From the Start
@@ -77,9 +86,13 @@ export default function RegisterForm() {
                 <Button
                     onClick={handleSignup}
                     disabled={isLoading}
-                    className="w-full h-10 sm:h-11"
+                    className="w-full h-10 sm:h-11 cursor-pointer"
                 >
-                    {isLoading ? "Creating Account..." : "Create Account"}
+                    {isLoading ?
+                        <span className="flex items-center gap-2">
+                            <span className="h-4 w-4 animate-spin  rounded-full border-2 border-current border-t-transparent" />
+                            Creating Account
+                        </span> : "Create Account"}
                 </Button>
                 <p>Already have an Account <Link href='/login'
                     className="text-blue-900 font-semibold">
