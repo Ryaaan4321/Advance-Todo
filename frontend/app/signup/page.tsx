@@ -8,6 +8,7 @@ import { useAuth } from "@/context/AuthContext"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
+import Image from "next/image"
 export default function RegisterForm() {
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
@@ -49,6 +50,16 @@ export default function RegisterForm() {
                         Let's Start From the Start
                     </p>
                 </div>
+                <div className="relative mx-auto sm:mx-0 w-16 sm:w-20 md:w-24 aspect-2/3">
+                    <Image
+                        src="/image1.png"
+                        alt="standing"
+                        fill
+                        className="object-contain"
+                        priority
+                    />
+                </div>
+
                 <div className="space-y-1">
                     <label
                         htmlFor="email"

@@ -8,6 +8,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { useEffect } from "react"
+import Image from "next/image"
 
 export default function LoginForm() {
     const [email, setEmail] = useState("")
@@ -52,6 +53,16 @@ export default function LoginForm() {
                             Start where you left off
                         </p>
                     </div>
+                    <Image
+                        src="/peep-standing-11.png"
+                        alt="standing"
+                        width={200}
+                        height={300}
+                        className="mx-auto sm:mx-0
+                    w-16 sm:w-20 md:w-24
+                    h-auto
+                    "
+                    ></Image>
                 </div>
                 <div className="space-y-1">
                     <label
